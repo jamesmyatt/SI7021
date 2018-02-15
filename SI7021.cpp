@@ -26,6 +26,9 @@ Updated: Jul 16, 2015: TomWS1:
 byte SERIAL1_READ[]      ={ 0xFA, 0x0F };
 byte SERIAL2_READ[]      ={ 0xFC, 0xC9 };
 
+// Use integer operations for speed
+#define CELSIUS_TO_FAHRENHEIT_HUNDRETHS(x) (9 * (long) x) / 5 + 3200
+
 bool _si_exists = false;
 
 SI7021::SI7021() {
@@ -51,7 +54,7 @@ bool SI7021::sensorExists() {
 
 int SI7021::getFahrenheitHundredths() {
     int c = getCelsiusHundredths();
-    return (1.8 * c) + 3200;
+    return CELSIUS_TO_FAHRENHEIT_HUNDRETHS(c);
 }
 
 int SI7021::getCelsiusHundredths() {
@@ -178,10 +181,10 @@ void SI7021::setHeater(bool on) {
 
 // get humidity, then get temperature reading from humidity measurement
 struct si7021_env SI7021::getHumidityAndTemperature() {
-    si7021_env ret = {0, 0, 0};
-    ret.humidityBasisPoints      = getHumidityBasisPoints();
-    ret.celsiusHundredths        = _getCelsiusPostHumidity();
-    ret.fahrenheitHundredths     = (1.8 * ret.celsiusHundredths) + 3200;
+    si7021_env ret;
+    ret.humidityBasisPoints = getHumidityBasisPoints();
+    ret.celsiusHundredths = _getCelsiusPostHumidity();
+    ret.fahrenheitHundredths = CELSIUS_TO_FAHRENHEIT_HUNDRETHS(ret.celsiusHundredths);
     return ret;
 }
 
