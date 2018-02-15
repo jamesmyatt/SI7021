@@ -168,12 +168,9 @@ void SI7021::setHeater(bool on) {
     _writeReg(&reg, 1);
     _readReg(&reg, 1);
 
-    // Update bit 2
-    if (on)
-        reg |= 0x04;  // set bit
-    else
-        reg &= ~0x04;  // clear bit
-
+    // Update bit 2 using Arduino function
+    bitWrite(reg, 2, on);
+    
     // Write user register 1
     byte userwrite[] = {USER1_WRITE, reg};
     _writeReg(userwrite, sizeof userwrite);
