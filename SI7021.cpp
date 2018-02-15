@@ -85,22 +85,18 @@ void SI7021::_command(byte cmd, byte * buf ) {
     _readReg(buf, 2);
 }
 
-void SI7021::_writeReg(byte * reg, int reglen) {
+uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen) {
     Wire.beginTransmission(I2C_ADDR);
-    for(int i = 0; i < reglen; i++) {
-        reg += i;
-        Wire.write(*reg); 
-    }
-    Wire.endTransmission();
+    Wire.write(reg, reglen);
+    return Wire.endTransmission(true);  // May not always need to send STOP
 }
 
-int SI7021::_readReg(byte * reg, int reglen) {
-    Wire.requestFrom(I2C_ADDR, reglen);
-    //while(Wire.available() < reglen); //remove redundant loop-wait per https://github.com/LowPowerLab/SI7021/issues/12
-    for(int i = 0; i < reglen; i++) { 
-        reg[i] = Wire.read(); 
+uint8_t SI7021::_readReg(uint8_t* reg, uint8_t reglen) {
+    uint8_t read = Wire.requestFrom(I2C_ADDR, reglen);
+    for(uint8_t i = 0; i < reglen; i++) {
+        reg[i] = Wire.read();
     }
-    return 1;
+    return read;
 }
 
 int SI7021::getSerialBytes(byte * buf) {
