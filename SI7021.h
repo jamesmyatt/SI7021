@@ -62,7 +62,9 @@ class SI7021
     void setHeater(bool on);
   private:
     void _command(byte cmd, byte * buf );
+    uint8_t _writeReg(const uint8_t* reg, size_t reglen, uint8_t sendStop);
     uint8_t _writeReg(const uint8_t* reg, size_t reglen);
+    uint8_t _readReg(uint8_t* reg, uint8_t reglen, uint8_t sendStop);
     uint8_t _readReg(uint8_t* reg, uint8_t reglen);
     int _getTemperature(bool fastConv);
 

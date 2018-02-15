@@ -78,25 +78,33 @@ unsigned int SI7021::getHumidityBasisPoints() {
 }
 
 void SI7021::_command(byte cmd, byte * buf ) {
-    _writeReg(&cmd, sizeof cmd);
+    _writeReg(&cmd, sizeof cmd, false);  // No STOP
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     delay(25);
 #endif
     _readReg(buf, 2);
 }
 
-uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen) {
+uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen, uint8_t sendStop) {
     Wire.beginTransmission(I2C_ADDR);
     Wire.write(reg, reglen);
-    return Wire.endTransmission(true);  // May not always need to send STOP
+    return Wire.endTransmission(sendStop);
 }
 
-uint8_t SI7021::_readReg(uint8_t* reg, uint8_t reglen) {
-    uint8_t read = Wire.requestFrom(I2C_ADDR, reglen);
+uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen) {
+    return _writeReg(reg, reglen, true);
+}
+
+uint8_t SI7021::_readReg(uint8_t* reg, uint8_t reglen, uint8_t sendStop) {
+    uint8_t read = Wire.requestFrom(I2C_ADDR, reglen, sendStop);
     for(uint8_t i = 0; i < reglen; i++) {
         reg[i] = Wire.read();
     }
     return read;
+}
+
+uint8_t SI7021::_readReg(uint8_t* reg, size_t reglen) {
+    return _readReg(reg, reglen, true);
 }
 
 int SI7021::getSerialBytes(byte * buf) {
