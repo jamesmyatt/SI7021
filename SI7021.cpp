@@ -144,23 +144,38 @@ int SI7021::getDeviceId() {
 // 0x80 = 13 bit temp, 10 bit RH
 // 0x81 = 11 bit temp, 11 bit RH
 void SI7021::setPrecision(byte setting) {
+    // RES is bits 7 and 0 of user register 1
+    
+    // Read user register 1
     byte reg = USER1_READ;
     _writeReg(&reg, 1);
     _readReg(&reg, 1);
 
-    reg = (reg & 0x7E) | (setting & 0x81);
+    // Update bits 7 and 0
+    reg &= ~0x81;  // clear bits
+    reg |= (setting & 0x81);  // set bits
+    
+    // Write user register 1
     byte userwrite[] = {USER1_WRITE, reg};
     _writeReg(userwrite, sizeof userwrite);
 }
 
 void SI7021::setHeater(bool on) {
-    byte userbyte;
-    if (on) {
-        userbyte = 0x3E;
-    } else {
-        userbyte = 0x3A;
-    }
-    byte userwrite[] = {USER1_WRITE, userbyte};
+    // HTRE is bit 2 of user register 1
+    
+    // Read user register 1
+    byte reg = USER1_READ;
+    _writeReg(&reg, 1);
+    _readReg(&reg, 1);
+
+    // Update bit 2
+    if (on)
+        reg |= 0x04;  // set bit
+    else
+        reg &= ~0x04;  // clear bit
+
+    // Write user register 1
+    byte userwrite[] = {USER1_WRITE, reg};
     _writeReg(userwrite, sizeof userwrite);
 }
 
