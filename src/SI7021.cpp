@@ -39,10 +39,7 @@ bool SI7021::begin(int SDA, int SCL) {
 bool SI7021::begin() {
     Wire.begin();
 #endif
-    Wire.beginTransmission(I2C_ADDR);
-    if (Wire.endTransmission() == 0) {
-        _si_exists = true;
-    }
+    _si_exists = (_writeReg(NULL, 0, true) == 0);
     return _si_exists;
 }
 
