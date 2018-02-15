@@ -86,11 +86,11 @@ uint16_t SI7021::_readMeasurement(uint8_t cmd, unsigned long timeConvMax) {
 #endif
 
     // Read measurement from device
-    if (Wire.requestFrom(I2C_ADDR, 2) < 2) {  // Read 2 bytes from I2C
+    if (Wire.requestFrom((uint8_t) I2C_ADDR, (uint8_t) 2, (uint8_t) true) < 2) {  // Read 2 bytes from I2C
         // Failed to read 2 bytes
         _si_exists = false;
         return 0;
-}
+    }
     uint8_t msByte = Wire.read();
     uint8_t lsByte = Wire.read();
     uint16_t data = (uint16_t) msByte << 8 | lsByte;
@@ -98,24 +98,24 @@ uint16_t SI7021::_readMeasurement(uint8_t cmd, unsigned long timeConvMax) {
 };
 
 uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen, uint8_t sendStop) {
-    Wire.beginTransmission(I2C_ADDR);
+    Wire.beginTransmission((uint8_t) I2C_ADDR);
     Wire.write(reg, reglen);
     return Wire.endTransmission(sendStop);
 }
 
-uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen) {
+uint8_t SI7021::_writeReg(const uint8_t *reg, size_t reglen) {
     return _writeReg(reg, reglen, true);
 }
 
 uint8_t SI7021::_readReg(uint8_t* reg, uint8_t reglen, uint8_t sendStop) {
-    uint8_t read = Wire.requestFrom(I2C_ADDR, reglen, sendStop);
+    uint8_t read = Wire.requestFrom((uint8_t) I2C_ADDR, reglen, sendStop);
     for(uint8_t i = 0; i < reglen; i++) {
         reg[i] = Wire.read();
     }
     return read;
 }
 
-uint8_t SI7021::_readReg(uint8_t* reg, size_t reglen) {
+uint8_t SI7021::_readReg(uint8_t* reg, uint8_t reglen) {
     return _readReg(reg, reglen, true);
 }
 
