@@ -58,25 +58,18 @@ int SI7021::getFahrenheitHundredths() {
 }
 
 int SI7021::getCelsiusHundredths() {
+    return _getTemperature(false);
+}
+
+int SI7021::_getTemperature(bool fastConv) {
     byte tempbytes[2];
-    _command(TEMP_READ, tempbytes);
+    _command(fastConv ? POST_RH_TEMP_READ : TEMP_READ, tempbytes);
     long tempraw = (long)tempbytes[0] << 8 | tempbytes[1];
     return ((17572 * tempraw) >> 16) - 4685;
 }
-
-int SI7021::_getCelsiusPostHumidity() {
-    byte tempbytes[2];
-    _command(POST_RH_TEMP_READ, tempbytes);
-    long tempraw = (long)tempbytes[0] << 8 | tempbytes[1];
-    return ((17572 * tempraw) >> 16) - 4685;
-}
-
 
 unsigned int SI7021::getHumidityPercent() {
-    byte humbytes[2];
-    _command(RH_READ, humbytes);
-    long humraw = (long)humbytes[0] << 8 | humbytes[1];
-    return ((125 * humraw) >> 16) - 6;
+    return getHumidityBasisPoints() / 100;
 }
 
 unsigned int SI7021::getHumidityBasisPoints() {
@@ -183,7 +176,7 @@ void SI7021::setHeater(bool on) {
 struct si7021_env SI7021::getHumidityAndTemperature() {
     si7021_env ret;
     ret.humidityBasisPoints = getHumidityBasisPoints();
-    ret.celsiusHundredths = _getCelsiusPostHumidity();
+    ret.celsiusHundredths = _getTemperature(true);
     ret.fahrenheitHundredths = CELSIUS_TO_FAHRENHEIT_HUNDRETHS(ret.celsiusHundredths);
     return ret;
 }
@@ -192,9 +185,7 @@ struct si7021_env SI7021::getHumidityAndTemperature() {
 struct si7021_thc SI7021::getTempAndRH()
 {
     si7021_thc ret;
-    
-    ret.humidityPercent   = getHumidityPercent();
-    ret.celsiusHundredths = _getCelsiusPostHumidity();
+    ret.humidityPercent = getHumidityPercent();
+    ret.celsiusHundredths = _getTemperature(true);
     return ret;
-
 }

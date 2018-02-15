@@ -64,8 +64,7 @@ class SI7021
     void _command(byte cmd, byte * buf );
     void _writeReg(byte * reg, int reglen);
     int _readReg(byte * reg, int reglen);
-    int _getCelsiusPostHumidity();
+    int _getTemperature(bool fastConv);
 };
 
 #endif
-
