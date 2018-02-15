@@ -60,7 +60,10 @@ int SI7021::getCelsiusHundredths() {
 }
 
 int SI7021::_getTemperature(bool fastConv) {
-    long tempraw = _readMeasurement(fastConv ? POST_RH_TEMP_READ : TEMP_READ);
+    long tempraw = _readMeasurement(
+      fastConv ? POST_RH_TEMP_READ : TEMP_READ,
+      fastConv ? 0 : 12
+    );
     return ((17572 * tempraw) >> 16) - 4685;
 }
 
@@ -69,19 +72,20 @@ unsigned int SI7021::getHumidityPercent() {
 }
 
 unsigned int SI7021::getHumidityBasisPoints() {
-    long humraw = _readMeasurement(RH_READ);
+    long humraw = _readMeasurement(RH_READ, 25);
     return ((12500 * humraw) >> 16) - 600;
 }
 
-uint16_t SI7021::_readMeasurement(uint8_t cmd) {
+uint16_t SI7021::_readMeasurement(uint8_t cmd, unsigned long timeConvMax) {
     // See page 16 of datasheet (Hold Master Mode)
 
     // Send command to device
     _writeReg(&cmd, sizeof cmd, false);  // No STOP
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
-    // Delay for a while so WiFi can be serviced until measurement is guaranteed to be ready
-    delay(25);
+    // Delay for a while so WiFi can be serviced until measurement is
+    // guaranteed to be ready (timeConvMax milliseconds)
+    delay(timeConvMax);
 #endif
 
     // Read measurement from device

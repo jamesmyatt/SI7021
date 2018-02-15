@@ -61,7 +61,7 @@ class SI7021
     void setPrecision(byte setting);
     void setHeater(bool on);
   private:
-    uint16_t _readMeasurement(uint8_t cmd);
+    uint16_t _readMeasurement(uint8_t cmd, unsigned long timeConvMax);
     uint8_t _writeReg(const uint8_t* reg, size_t reglen, uint8_t sendStop);
     uint8_t _writeReg(const uint8_t* reg, size_t reglen);
     uint8_t _readReg(uint8_t* reg, uint8_t reglen, uint8_t sendStop);
