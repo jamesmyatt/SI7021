@@ -29,9 +29,7 @@ byte SERIAL2_READ[]      ={ 0xFC, 0xC9 };
 // Use integer operations for speed
 #define CELSIUS_TO_FAHRENHEIT_HUNDRETHS(x) (9 * (long) x) / 5 + 3200
 
-bool _si_exists = false;
-
-SI7021::SI7021() {
+SI7021::SI7021() : _si_exists(false) {
 }
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)

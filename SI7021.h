@@ -65,6 +65,8 @@ class SI7021
     void _writeReg(byte * reg, int reglen);
     int _readReg(byte * reg, int reglen);
     int _getTemperature(bool fastConv);
+
+    bool _si_exists;
 };
 
 #endif
