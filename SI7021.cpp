@@ -60,9 +60,7 @@ int SI7021::getCelsiusHundredths() {
 }
 
 int SI7021::_getTemperature(bool fastConv) {
-    byte tempbytes[2];
-    _command(fastConv ? POST_RH_TEMP_READ : TEMP_READ, tempbytes);
-    long tempraw = (long)tempbytes[0] << 8 | tempbytes[1];
+    long tempraw = _readMeasurement(fastConv ? POST_RH_TEMP_READ : TEMP_READ);
     return ((17572 * tempraw) >> 16) - 4685;
 }
 
@@ -71,19 +69,32 @@ unsigned int SI7021::getHumidityPercent() {
 }
 
 unsigned int SI7021::getHumidityBasisPoints() {
-    byte humbytes[2];
-    _command(RH_READ, humbytes);
-    long humraw = (long)humbytes[0] << 8 | humbytes[1];
+    long humraw = _readMeasurement(RH_READ);
     return ((12500 * humraw) >> 16) - 600;
 }
 
-void SI7021::_command(byte cmd, byte * buf ) {
+uint16_t SI7021::_readMeasurement(uint8_t cmd) {
+    // See page 16 of datasheet (Hold Master Mode)
+
+    // Send command to device
     _writeReg(&cmd, sizeof cmd, false);  // No STOP
+
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+    // Delay for a while so WiFi can be serviced until measurement is guaranteed to be ready
     delay(25);
 #endif
-    _readReg(buf, 2);
+
+    // Read measurement from device
+    if (Wire.requestFrom(I2C_ADDR, 2) < 2) {  // Read 2 bytes from I2C
+        // Failed to read 2 bytes
+        _si_exists = false;
+        return 0;
 }
+    uint8_t msByte = Wire.read();
+    uint8_t lsByte = Wire.read();
+    uint16_t data = (uint16_t) msByte << 8 | lsByte;
+    return data;
+};
 
 uint8_t SI7021::_writeReg(const uint8_t* reg, size_t reglen, uint8_t sendStop) {
     Wire.beginTransmission(I2C_ADDR);
